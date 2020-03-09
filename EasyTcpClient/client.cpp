@@ -13,13 +13,15 @@
 int main() {
 
 	//启动windows socket 2.x环境
-	WORD ver = MAKEWORD(2, 2);
-	WSADATA dat;
+	WORD wVersionRequested = MAKEWORD(2, 2);
+	//The WSADATA structure is used to save the Windows Sockets
+	// initialization information returned by the function WSAStartup
+	WSADATA wsadata;
 
-	//调用winSocket的启动函数
-	//ver  ：WORD的版本号
-	//&dat ：WSADATA的数据结构
-	WSAStartup(ver, &dat);
+	//调用winSocket的启动函数WSAStartup
+	//wVersionRequested  ：WORD的版本号
+	//&wsadata ：WSADATA的数据结构(struct)
+	WSAStartup(wVersionRequested, &wsadata);
 	//用Socket API建立简易的TCP客户端
 	// 1. 建立一个socket
 	SOCKET _sock = socket(AF_INET, SOCK_STREAM, 0);
