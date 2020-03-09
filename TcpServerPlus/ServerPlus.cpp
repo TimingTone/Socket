@@ -30,7 +30,7 @@ int main() {
 	//AF_INEF: ipv4,   
 	SOCKET _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	// 2. Bind the port that accepts client connections       bind
+	// 2. Bind the port that accepts client connections  "bind"
 	sockaddr_in _sin = { };
 	_sin.sin_family = AF_INET;   //The same as the _sock(ipv4)
 	_sin.sin_port = htons(4567);  //host to net unsigned short(htons)
@@ -43,33 +43,56 @@ int main() {
 		printf("Succeed in binding port\n");
 	}
 
-	// 3. Listening to the network port           listen  
+	// 3. Listening to the network port     "listen"
 	if (listen(_sock, 5 == SOCKET_ERROR)) {
 		printf("Error, failed in listenning Internet Port\n");
 	}
 	else {
 		printf("Succeed in listenning Internet Port\n");
 	}
-	// 4. Waiting to receive client connection         accept
+	// 4. Waiting to receive client connection   "accept"
 	sockaddr_in clientAddr = {};
 	int nAddrLen = sizeof(sockaddr_in);
 	SOCKET _cSock = INVALID_SOCKET;
-	char msqBuf[] = "Hello , I'm server.";
+	//char msgBuf[] = "Hello , I'm server.";
 
+	_cSock = accept(_sock, (sockaddr*)&clientAddr, &nAddrLen);
+	if (INVALID_SOCKET == _cSock) {
+		printf("failed to receive the socket of client......");
+	}
+	printf("A new client has joined...: IP = %s \n", inet_ntoa(clientAddr.sin_addr));
+
+	char _recvBuf[128] = {};
 	while (true) {
-		_cSock = accept(_sock, (sockaddr*)&clientAddr, &nAddrLen);
-		if (INVALID_SOCKET == _cSock) {
-			printf("failed to receive the socket of client......");
+		// 5, Receive client data
+		int nLen = recv(_cSock, _recvBuf, 128, 0);
+		if (nLen <= 0) {
+			printf("Client has quit!, mission completed.");
+			break;
 		}
-		printf("A new client has joined...: IP = %s \n", inet_ntoa(clientAddr.sin_addr));
-		// 5. Send data to client             send
-		send(_cSock, msqBuf, strlen(msqBuf) + 1, 0);
+		// 6, Deal with request.
+		if (0 == strcmp(_recvBuf, "getName")) {
+			char msgBuf[] = "Timing Tone";
+			send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
+		}
+		else if (0 == strcmp(_recvBuf, "getAge")) {
+			char msgBuf[] = "100000";
+			send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
+		}
+		else {
+			char msgBuf[] = "What can i do for you?";
+			// 7. Send data to client             send
+			send(_cSock, msgBuf, strlen(msgBuf) + 1, 0);
+		}
+	
 	}
 
-	// 6. Close socket                  closesocket
+	// 8. Close socket                  closesocket
 	closesocket(_sock);
 
 	// Clean up Windows Socket environment
 	WSACleanup();
+	printf("Client has quit, mission completed.");
+	getchar();
 	return 0;
 }
